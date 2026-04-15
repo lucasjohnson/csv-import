@@ -1,66 +1,71 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+import { Alert, Box, IconButton, Snackbar, Typography } from "@mui/material";
+import GitHubIcon from "@mui/icons-material/GitHub";
+import { Modal } from "./components/Modal/Modal";
+import { DataTable } from "./components/DataTable/DataTable";
+import type { RowState } from "./lib/validate/types";
+import * as styles from "./styles";
+export const LandingPage = () => {
+  const [rows, setRows] = useState<RowState[]>([]);
+  const [importCount, setImportCount] = useState<number | null>(null);
+
+  const handleImport = (imported: RowState[]) => {
+    setRows((previous) => {
+      let maxId = -1;
+      for (const row of previous) {
+        if (row.id > maxId) maxId = row.id;
+      }
+      const nextId = maxId + 1;
+      const remapped = imported.map((row, index) => ({
+        ...row,
+        id: nextId + index,
+      }));
+      return [...previous, ...remapped];
+    });
+
+    setImportCount(imported.length);
+  };
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <Box sx={styles.pageRoot}>
+      <Box sx={styles.pageHeader} component="header">
+        <Box sx={styles.titleWrapper}>
+          <Typography variant="h4" component="h1">
+            CSV Import
+          </Typography>
+          <IconButton
+            component="a"
+            href="https://github.com/lucasjohnson/csv-import"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="https://github.com/lucasjohnson/csv-import"
+          >
+            <GitHubIcon />
+          </IconButton>
+        </Box>
+        <Modal
+          existingRows={rows}
+          onImport={handleImport}
+          onOpen={() => setImportCount(null)}
         />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </Box>
+      <Box component="main" sx={styles.pageMain}>
+        <DataTable rows={rows} />
+      </Box>
+      <Snackbar
+        open={importCount !== null}
+        autoHideDuration={5000}
+        onClose={() => setImportCount(null)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="success" onClose={() => setImportCount(null)}>
+          {importCount} records successfully imported
+        </Alert>
+      </Snackbar>
+    </Box>
   );
-}
+};
+
+export default LandingPage;
