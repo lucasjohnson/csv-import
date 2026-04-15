@@ -75,6 +75,9 @@ export const Modal = ({ existingRows, onImport, onOpen }: Props) => {
         <Button variant="outlined" href="/test-data.csv" download>
           Download Test CSV
         </Button>
+        <Button variant="outlined" href="/CSV-Import-Demo.mov" download>
+          Download DEMO Video
+        </Button>
         <Button variant="contained" onClick={handleOpen}>
           Import CSV
         </Button>
